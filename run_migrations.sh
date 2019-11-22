@@ -18,4 +18,7 @@ if [ $1 == "test" ]; then
     export DB_CONNECTION="mysql+mysqlconnector://$DB_USERNAME_TEST:$DB_PASSWORD_TEST@$DB_HOST_TEST:$DB_PORT_TEST/$DB_NAME_TEST"
 fi
 
-alembic upgrade head
+echo "Using connection: $DB_CONNECTION"
+
+alembic "${@:2}"
+
