@@ -1,37 +1,12 @@
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
-from unittest import TestCase
+from tests.test_joystream import JoystreamTest
+from app.models.data import Extrinsic, Event
+from app.models.joystream import Category
 
-from app.settings import DB_CONNECTION_TEST, DEBUG
-from app.models.data import Extrinsic
+import json
 
-Session = sessionmaker()
-engine = create_engine(DB_CONNECTION_TEST, echo=DEBUG, isolation_level="READ_UNCOMMITTED")
-
-class JoystreamExtrinsicTest(TestCase):
-    def setUp(self):
-        # connect to the database
-        self.connection = engine.connect()
-
-        # begin a non-ORM transaction
-        self.trans = self.connection.begin()
-
-        # bind an individual Session to the connection
-        self.session = Session(bind=self.connection)
-
-    def tearDown(self):
-        self.session.close()
-
-        # rollback - everything that happened with the
-        # Session above (including calls to commit())
-        # is rolled back.
-        self.trans.rollback()
-
-        # return connection to the Engine
-        self.connection.close()
-
+class JoystreamExtrinsicTest(JoystreamTest):
     def test_create_extrinsic(self):
-        self.session.add(Extrinsic(
+        extrinsic = Extrinsic(
             block_id=100,
             extrinsic_idx=1,
             extrinsic_hash="0xbeef",
@@ -41,8 +16,48 @@ class JoystreamExtrinsicTest(TestCase):
             signedby_index=1,
             success=1,
             error=0
-        ))
+        )
+        self.session.add(extrinsic)
         self.session.commit()
+        count = Extrinsic.query(self.session).filter_by(block_id=100).count()
+        self.assertEqual(count, 1)
+
+    def test_create_category_extrinsic(self):
+        """Assumes that harvester always processes events before processing extrinsics"""
+        category_extrinsic_params = [{'name': 'parent', 'type': 'Option<CategoryId>', 'value': None, 'valueRaw': '00'}, {'name': 'title', 'type': 'Bytes', 'value': 'Another category', 'valueRaw': '416e6f746865722063617465676f7279'}, {'name': 'description', 'type': 'Bytes', 'value': 'Need a new category in the db', 'valueRaw': '4e6565642061206e65772063617465676f727920696e20746865206462'}]
+        category_event_attributes = [{'type': 'CategoryId', 'value': 3, 'valueRaw': '0300000000000000'}]
+
+        event = Event(
+            block_id=100,
+            extrinsic_idx=1,
+            event_idx=1,
+            module_id='forum',
+            event_id='CategoryCreated',
+            system=0, # this is not a system event
+            module=1, # instead, this is a module event
+            attributes=category_event_attributes
+        )
+        self.session.add(event)
+
+        extrinsic = Extrinsic(
+            block_id=100,
+            extrinsic_idx=1,
+            extrinsic_hash="0xbeef",
+            signed=10,
+            unsigned=20,
+            signedby_address=1100,
+            signedby_index=1,
+            success=1,
+            error=0,
+            module_id='forum',
+            call_id='create_category',
+            params=category_extrinsic_params
+        )
+        self.session.add(extrinsic)
+
+        self.session.commit()
+        count = Category.query(self.session).filter_by(block_id=100).count()
+        self.assertEqual(count, 1)
 
 if __name__ == '__main__':
     unittest.main()
