@@ -20,6 +20,7 @@
 
 import os
 
+# Configurations for development environment
 DB_NAME = os.environ.get("DB_NAME", "polkascan")
 DB_HOST = os.environ.get("DB_HOST", "mysql")
 DB_PORT = os.environ.get("DB_PORT", 3306)
@@ -30,6 +31,7 @@ DB_CONNECTION = os.environ.get("DB_CONNECTION", "mysql+mysqlconnector://{}:{}@{}
     DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME
 ))
 
+# Configurations for test environment
 DB_NAME_TEST = os.environ.get("DB_NAME_TEST", "polkascan_test")
 DB_HOST_TEST = os.environ.get("DB_HOST_TEST", "mysql")
 DB_PORT_TEST = os.environ.get("DB_PORT_TEST", 3306)
