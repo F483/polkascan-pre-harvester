@@ -25,16 +25,18 @@ from sqlalchemy.orm import relationship
 
 from app.models.base import BaseModel
 
+# Captures the Forum Category
+# indexes on id, parent_id, title, description, created_at and account_id
 class Category(BaseModel):
-    __tablename__ = 'forum_category'
+    __tablename__ = 'joystream_forum_category'
 
-    id = sa.Column(sa.BigInteger(), primary_key=True, autoincrement=False)
+    id = sa.Column(sa.BigInteger(), primary_key=True, autoincrement=False, index=True)
     # extracted from position_in_parent_category
-    parent_id = sa.Column(sa.BigInteger())
+    parent_id = sa.Column(sa.BigInteger(), index=True)
 
-    title = sa.Column(sa.String(150))
-    description = sa.Column(sa.String(150))
-    created_at = sa.Column(sa.DateTime())
+    title = sa.Column(sa.String(150), index=True)
+    description = sa.Column(sa.String(150), index=True)
+    created_at = sa.Column(sa.DateTime(), index=True)
     deleted = sa.Column(sa.Boolean())
     archived = sa.Column(sa.Boolean())
     num_direct_subcategories = sa.Column(sa.Integer())
@@ -44,7 +46,7 @@ class Category(BaseModel):
     # extracted from position_in_parent_category
     position_in_parent_category = sa.Column(sa.Integer())
 
-    account_id = sa.Column(sa.Integer)
+    account_id = sa.Column(sa.String(64), primary_key=True, index=True)
 
 # class Post(BaseModel):
 #     __tablename__ = 'forum_post'
