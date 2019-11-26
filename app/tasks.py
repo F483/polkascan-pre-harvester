@@ -37,6 +37,8 @@ from substrateinterface import SubstrateInterface
 
 from app.settings import DB_CONNECTION, DEBUG, SUBSTRATE_RPC_URL, TYPE_REGISTRY
 
+import app.models.event_listeners
+
 CELERY_BROKER = os.environ.get('CELERY_BROKER')
 CELERY_BACKEND = os.environ.get('CELERY_BACKEND')
 
@@ -62,6 +64,8 @@ class BaseTask(celery.Task):
         self.engine = create_engine(DB_CONNECTION, echo=DEBUG, isolation_level="READ_UNCOMMITTED")
         session_factory = sessionmaker(bind=self.engine, autoflush=False, autocommit=False)
         self.session = scoped_session(session_factory)
+
+        sa.event.listen(self.session, 'after_flush', receive_after_flush)
 
         return super().__call__(*args, **kwargs)
 

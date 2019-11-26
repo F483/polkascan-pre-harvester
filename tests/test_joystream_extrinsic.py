@@ -1,3 +1,4 @@
+import sqlalchemy as sa
 from tests.test_joystream import JoystreamTest
 from app.models.data import Extrinsic, Event
 from app.models.joystream import Category
@@ -38,6 +39,10 @@ class JoystreamExtrinsicTest(JoystreamTest):
             attributes=category_event_attributes
         )
         self.session.add(event)
+        self.session.flush()
+
+        count = Category.query(self.session).filter_by(block_id=100).count()
+        self.assertEqual(count, 1)
 
         extrinsic = Extrinsic(
             block_id=100,
@@ -54,10 +59,14 @@ class JoystreamExtrinsicTest(JoystreamTest):
             params=category_extrinsic_params
         )
         self.session.add(extrinsic)
+        self.session.flush()
 
-        self.session.commit()
         count = Category.query(self.session).filter_by(block_id=100).count()
         self.assertEqual(count, 1)
+
+        category = Category.query(self.session).filter_by(block_id=100).first()
+        self.assertEqual(category.title, 'Another category')
+        self.assertEqual(category.description, 'Need a new category in the db')
 
 if __name__ == '__main__':
     unittest.main()

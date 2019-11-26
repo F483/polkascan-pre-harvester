@@ -1,8 +1,8 @@
 """Add joystream forum category
 
-Revision ID: dd193c66ee2a
+Revision ID: b6aaefef05d5
 Revises: a2fc0a403498
-Create Date: 2019-11-22 16:14:50.584871
+Create Date: 2019-11-26 16:38:00.681574
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'dd193c66ee2a'
+revision = 'b6aaefef05d5'
 down_revision = 'a2fc0a403498'
 branch_labels = None
 depends_on = None
@@ -30,16 +30,15 @@ def upgrade():
     sa.Column('num_direct_unmoderated_threads', sa.Integer(), nullable=True),
     sa.Column('num_direct_moderated_threads', sa.Integer(), nullable=True),
     sa.Column('position_in_parent_category', sa.Integer(), nullable=True),
-    sa.Column('account_id', sa.String(length=64), nullable=False),
+    sa.Column('account_id', sa.String(length=64), nullable=True),
     sa.Column('block_id', sa.Integer(), nullable=False),
-    sa.Column('extrinsic_idx', sa.Integer(), nullable=False),
-    sa.PrimaryKeyConstraint('id', 'account_id', 'block_id', 'extrinsic_idx')
+    sa.Column('extrinsic_idx', sa.Integer(), nullable=True),
+    sa.Column('event_idx', sa.Integer(), nullable=True),
+    sa.PrimaryKeyConstraint('id', 'block_id')
     )
-    op.create_index(op.f('ix_joystream_forum_category_account_id'), 'joystream_forum_category', ['account_id'], unique=False)
     op.create_index(op.f('ix_joystream_forum_category_block_id'), 'joystream_forum_category', ['block_id'], unique=False)
     op.create_index(op.f('ix_joystream_forum_category_created_at'), 'joystream_forum_category', ['created_at'], unique=False)
     op.create_index(op.f('ix_joystream_forum_category_description'), 'joystream_forum_category', ['description'], unique=False)
-    op.create_index(op.f('ix_joystream_forum_category_extrinsic_idx'), 'joystream_forum_category', ['extrinsic_idx'], unique=False)
     op.create_index(op.f('ix_joystream_forum_category_id'), 'joystream_forum_category', ['id'], unique=False)
     op.create_index(op.f('ix_joystream_forum_category_parent_id'), 'joystream_forum_category', ['parent_id'], unique=False)
     op.create_index(op.f('ix_joystream_forum_category_title'), 'joystream_forum_category', ['title'], unique=False)
@@ -51,10 +50,8 @@ def downgrade():
     op.drop_index(op.f('ix_joystream_forum_category_title'), table_name='joystream_forum_category')
     op.drop_index(op.f('ix_joystream_forum_category_parent_id'), table_name='joystream_forum_category')
     op.drop_index(op.f('ix_joystream_forum_category_id'), table_name='joystream_forum_category')
-    op.drop_index(op.f('ix_joystream_forum_category_extrinsic_idx'), table_name='joystream_forum_category')
     op.drop_index(op.f('ix_joystream_forum_category_description'), table_name='joystream_forum_category')
     op.drop_index(op.f('ix_joystream_forum_category_created_at'), table_name='joystream_forum_category')
     op.drop_index(op.f('ix_joystream_forum_category_block_id'), table_name='joystream_forum_category')
-    op.drop_index(op.f('ix_joystream_forum_category_account_id'), table_name='joystream_forum_category')
     op.drop_table('joystream_forum_category')
     # ### end Alembic commands ###

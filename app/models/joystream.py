@@ -24,7 +24,7 @@ from sqlalchemy.dialects.mysql import LONGTEXT
 from sqlalchemy.orm import relationship
 
 from app.models.base import BaseModel
-from app.models.data import Block
+from app.models.data import Block, Extrinsic
 
 # Captures the Forum Category
 # indexes on id, parent_id, title, description, created_at and account_id
@@ -47,12 +47,13 @@ class Category(BaseModel):
     # extracted from position_in_parent_category
     position_in_parent_category = sa.Column(sa.Integer())
 
-    account_id = sa.Column(sa.String(64), primary_key=True, index=True)
+    account_id = sa.Column(sa.String(64))
 
     # block and extrinsic index
     block_id = sa.Column(sa.Integer(), primary_key=True, index=True)
     block = relationship(Block, foreign_keys=[block_id], primaryjoin=block_id == Block.id)
-    extrinsic_idx = sa.Column(sa.Integer(), primary_key=True, index=True)
+    extrinsic_idx = sa.Column(sa.Integer())
+    event_idx = sa.Column(sa.Integer())
 
 # class Post(BaseModel):
 #     __tablename__ = 'forum_post'
