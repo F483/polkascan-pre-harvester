@@ -24,7 +24,7 @@ from time import sleep
 import celery
 from celery.result import AsyncResult
 
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, text, event
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.sql import func
@@ -37,7 +37,7 @@ from substrateinterface import SubstrateInterface
 
 from app.settings import DB_CONNECTION, DEBUG, SUBSTRATE_RPC_URL, TYPE_REGISTRY
 
-import app.models.event_listeners
+from app.models.event_listeners import receive_after_flush
 
 CELERY_BROKER = os.environ.get('CELERY_BROKER')
 CELERY_BACKEND = os.environ.get('CELERY_BACKEND')
@@ -65,7 +65,7 @@ class BaseTask(celery.Task):
         session_factory = sessionmaker(bind=self.engine, autoflush=False, autocommit=False)
         self.session = scoped_session(session_factory)
 
-        sa.event.listen(self.session, 'after_flush', receive_after_flush)
+        event.listen(self.session, 'after_flush', receive_after_flush)
 
         return super().__call__(*args, **kwargs)
 
