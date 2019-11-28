@@ -37,9 +37,13 @@ class Category(BaseModel):
 
     title = sa.Column(sa.String(150), index=True)
     description = sa.Column(sa.String(150), index=True)
-    created_at = sa.Column(sa.DateTime(), index=True)
+
+    created_at_block_number = sa.Column(sa.Integer())
+    created_at_moment = sa.Column(sa.BigInteger())
+
     deleted = sa.Column(sa.Boolean())
     archived = sa.Column(sa.Boolean())
+
     num_direct_subcategories = sa.Column(sa.Integer())
     num_direct_unmoderated_threads = sa.Column(sa.Integer())
     num_direct_moderated_threads = sa.Column(sa.Integer())
@@ -55,7 +59,89 @@ class Category(BaseModel):
     extrinsic_idx = sa.Column(sa.Integer())
     event_idx = sa.Column(sa.Integer())
 
-# class Post(BaseModel):
-#     __tablename__ = 'forum_post'
+    threads = relationship('Thread', backref='category')
 
-#     id = sa.Column(sa.BigInteger(), primary_key=True, autoincrement=False)
+class Thread(BaseModel):
+    __tablename__ = 'joystream_forum_thread'
+
+    id = sa.Column(sa.BigInteger(), primary_key=True, autoincrement=False, index=True)
+
+    title = sa.Column(sa.String(150), index=True)
+
+    category_id = sa.Column(sa.BigInteger(), sa.ForeignKey('joystream_forum_category.id'))
+
+    nr_in_category = sa.Column(sa.Integer())
+    num_unmoderated_posts = sa.Column(sa.Integer())
+    num_moderated_posts = sa.Column(sa.Integer())
+
+    created_at_block_number = sa.Column(sa.Integer())
+    created_at_moment = sa.Column(sa.BigInteger())
+
+    author_id = sa.Column(sa.String(64))
+
+    posts = relationship('Post', backref='thread')
+
+class ModerationAction(BaseModel):
+    __tablename__ = 'joystream_forum_moderation_action'
+
+    # The id doesn't come from substrate, but is autoincremented here to
+    # provide the ModerationAction - ModerationRationale relationship
+    id = sa.Column(sa.BigInteger(), primary_key=True, autoincrement=True, index=True)
+
+    moderator_id = sa.Column(sa.String(64))
+    moderation_rationales = relationship('ModerationRationale', backref='moderation_action')
+
+    moderated_at_block_number = sa.Column(sa.Integer())
+    moderated_at_moment = sa.Column(sa.BigInteger())
+
+class ModerationRationale(BaseModel):
+    __tablename__ = 'joystream_forum_moderation_rationale'
+
+    # The id doesn't come from substrate, but is autoincremented here to
+    # provide the ModerationAction - ModerationRationale relationship
+    id = sa.Column(sa.BigInteger(), primary_key=True, autoincrement=True, index=True)
+
+    moderation_action_id = sa.Column(sa.BigInteger(), sa.ForeignKey('joystream_forum_moderation_action.id'))
+    rationale = sa.Column(sa.Integer())
+
+class Post(BaseModel):
+    __tablename__ = 'joystream_forum_post'
+
+    id = sa.Column(sa.BigInteger(), primary_key=True, autoincrement=False, index=True)
+
+    # Don't set up fk or relationship
+    thread_id = sa.Column(sa.BigInteger(), sa.ForeignKey('joystream_forum_thread.id'))
+
+    nr_in_thread = sa.Column(sa.Integer())
+    current_text = sa.Column(sa.Text())
+
+    post_text_change_history = relationship('PostTextChangeHistory', backref='post')
+
+    created_at_block_number = sa.Column(sa.Integer())
+    created_at_moment = sa.Column(sa.BigInteger())
+
+class PostTextChangeHistory(BaseModel):
+    __tablename__ = 'joystream_forum_post_text_change_history'
+
+        # The id doesn't come from substrate, but is autoincremented here to
+    # provide the ModerationAction - ModerationRationale relationship
+    id = sa.Column(sa.BigInteger(), primary_key=True, autoincrement=True, index=True)
+
+    expired_at_block_number = sa.Column(sa.Integer())
+    expired_at_moment = sa.Column(sa.BigInteger())
+    text = sa.Column(sa.Text())
+
+    post_id = sa.Column(sa.BigInteger(), sa.ForeignKey('joystream_forum_post.id'))
+
+    author_id = sa.Column(sa.String(64))
+
+
+thread_moderation_association = sa.Table('thread_moderation', BaseModel.metadata,
+                                         sa.Column('thread_id', sa.BigInteger(), sa.ForeignKey('joystream_forum_thread.id')),
+                                         sa.Column('moderation_action_id', sa.BigInteger(), sa.ForeignKey('joystream_forum_moderation_action.id')),
+)
+
+post_moderation_association = sa.Table('post_moderation', BaseModel.metadata,
+                                       sa.Column('post_id', sa.BigInteger(), sa.ForeignKey('joystream_forum_post.id')),
+                                       sa.Column('moderation_action_id', sa.BigInteger(), sa.ForeignKey('joystream_forum_moderation_action.id')),
+)
