@@ -1,8 +1,8 @@
 """Add joystream forum category, thread, post and relationships
 
-Revision ID: bf2fd52d3716
+Revision ID: fd881f915ee3
 Revises: a2fc0a403498
-Create Date: 2019-11-28 19:09:18.130954
+Create Date: 2019-12-03 17:15:12.581529
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'bf2fd52d3716'
+revision = 'fd881f915ee3'
 down_revision = 'a2fc0a403498'
 branch_labels = None
 depends_on = None
@@ -61,6 +61,7 @@ def upgrade():
     op.create_table('joystream_forum_thread',
     sa.Column('id', sa.BigInteger(), autoincrement=False, nullable=False),
     sa.Column('title', sa.String(length=150), nullable=True),
+    sa.Column('text', sa.Text(), nullable=True),
     sa.Column('category_id', sa.BigInteger(), nullable=True),
     sa.Column('nr_in_category', sa.Integer(), nullable=True),
     sa.Column('num_unmoderated_posts', sa.Integer(), nullable=True),
@@ -68,21 +69,30 @@ def upgrade():
     sa.Column('created_at_block_number', sa.Integer(), nullable=True),
     sa.Column('created_at_moment', sa.BigInteger(), nullable=True),
     sa.Column('author_id', sa.String(length=64), nullable=True),
+    sa.Column('block_id', sa.Integer(), nullable=False),
+    sa.Column('extrinsic_idx', sa.Integer(), nullable=True),
+    sa.Column('event_idx', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['category_id'], ['joystream_forum_category.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id', 'block_id')
     )
+    op.create_index(op.f('ix_joystream_forum_thread_block_id'), 'joystream_forum_thread', ['block_id'], unique=False)
     op.create_index(op.f('ix_joystream_forum_thread_id'), 'joystream_forum_thread', ['id'], unique=False)
     op.create_index(op.f('ix_joystream_forum_thread_title'), 'joystream_forum_thread', ['title'], unique=False)
     op.create_table('joystream_forum_post',
     sa.Column('id', sa.BigInteger(), autoincrement=False, nullable=False),
     sa.Column('thread_id', sa.BigInteger(), nullable=True),
+    sa.Column('author_id', sa.String(length=64), nullable=True),
     sa.Column('nr_in_thread', sa.Integer(), nullable=True),
     sa.Column('current_text', sa.Text(), nullable=True),
     sa.Column('created_at_block_number', sa.Integer(), nullable=True),
     sa.Column('created_at_moment', sa.BigInteger(), nullable=True),
+    sa.Column('block_id', sa.Integer(), nullable=False),
+    sa.Column('extrinsic_idx', sa.Integer(), nullable=True),
+    sa.Column('event_idx', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['thread_id'], ['joystream_forum_thread.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id', 'block_id')
     )
+    op.create_index(op.f('ix_joystream_forum_post_block_id'), 'joystream_forum_post', ['block_id'], unique=False)
     op.create_index(op.f('ix_joystream_forum_post_id'), 'joystream_forum_post', ['id'], unique=False)
     op.create_table('joystream_forum_thread_moderation',
     sa.Column('thread_id', sa.BigInteger(), nullable=True),
@@ -117,9 +127,11 @@ def downgrade():
     op.drop_table('joystream_forum_post_moderation')
     op.drop_table('joystream_forum_thread_moderation')
     op.drop_index(op.f('ix_joystream_forum_post_id'), table_name='joystream_forum_post')
+    op.drop_index(op.f('ix_joystream_forum_post_block_id'), table_name='joystream_forum_post')
     op.drop_table('joystream_forum_post')
     op.drop_index(op.f('ix_joystream_forum_thread_title'), table_name='joystream_forum_thread')
     op.drop_index(op.f('ix_joystream_forum_thread_id'), table_name='joystream_forum_thread')
+    op.drop_index(op.f('ix_joystream_forum_thread_block_id'), table_name='joystream_forum_thread')
     op.drop_table('joystream_forum_thread')
     op.drop_index(op.f('ix_joystream_forum_moderation_rationale_id'), table_name='joystream_forum_moderation_rationale')
     op.drop_table('joystream_forum_moderation_rationale')

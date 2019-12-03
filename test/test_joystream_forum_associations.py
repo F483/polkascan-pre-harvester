@@ -22,7 +22,8 @@ class JoystreamForumAssociationTest(JoystreamTest):
         thread = Thread(
             id = 1,
             category = category,
-            title = "A thread title"
+            title = "A thread title",
+            block_id = 101
         )
         self.session.add(thread)
         self.session.commit()
@@ -34,5 +35,12 @@ class JoystreamForumAssociationTest(JoystreamTest):
         post = Post(
             id = 1,
             thread = thread,
-            current_text = 'Some text'
+            current_text = 'Some text',
+            block_id = 102
         )
+
+        self.session.add(thread)
+        self.session.commit()
+
+        assert post is not None
+        assert len(thread.posts) is 1

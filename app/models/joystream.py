@@ -72,6 +72,7 @@ class Thread(BaseModel):
     id = sa.Column(sa.BigInteger(), primary_key=True, autoincrement=False, index=True)
 
     title = sa.Column(sa.String(150), index=True)
+    text = sa.Column(sa.Text())
 
     category_id = sa.Column(sa.BigInteger(), sa.ForeignKey('joystream_forum_category.id'))
 
@@ -87,6 +88,12 @@ class Thread(BaseModel):
     posts = relationship('Post', backref='thread')
 
     moderations = relationship('ModerationAction', secondary=thread_moderation_association, backref='thread')
+
+    # block and extrinsic index
+    block_id = sa.Column(sa.Integer(), primary_key=True, index=True)
+    block = relationship(Block, foreign_keys=[block_id], primaryjoin=block_id == Block.id)
+    extrinsic_idx = sa.Column(sa.Integer())
+    event_idx = sa.Column(sa.Integer())
 
 class ModerationAction(BaseModel):
     __tablename__ = 'joystream_forum_moderation_action'
@@ -128,6 +135,12 @@ class Post(BaseModel):
     created_at_block_number = sa.Column(sa.Integer())
     created_at_moment = sa.Column(sa.BigInteger())
 
+    # block and extrinsic index
+    block_id = sa.Column(sa.Integer(), primary_key=True, index=True)
+    block = relationship(Block, foreign_keys=[block_id], primaryjoin=block_id == Block.id)
+    extrinsic_idx = sa.Column(sa.Integer())
+    event_idx = sa.Column(sa.Integer())
+
 class PostTextChangeHistory(BaseModel):
     __tablename__ = 'joystream_forum_post_text_change_history'
 
@@ -142,7 +155,6 @@ class PostTextChangeHistory(BaseModel):
     post_id = sa.Column(sa.BigInteger(), sa.ForeignKey('joystream_forum_post.id'))
 
     author_id = sa.Column(sa.String(64))
-
 
 post_moderation_association = sa.Table('joystream_forum_post_moderation', BaseModel.metadata,
                                        sa.Column('post_id', sa.BigInteger(), sa.ForeignKey('joystream_forum_post.id')),
