@@ -61,6 +61,11 @@ class Category(BaseModel):
 
     threads = relationship('Thread', backref='category')
 
+thread_moderation_association = sa.Table('joystream_forum_thread_moderation', BaseModel.metadata,
+                                         sa.Column('thread_id', sa.BigInteger(), sa.ForeignKey('joystream_forum_thread.id')),
+                                         sa.Column('moderation_action_id', sa.BigInteger(), sa.ForeignKey('joystream_forum_moderation_action.id')),
+)
+
 class Thread(BaseModel):
     __tablename__ = 'joystream_forum_thread'
 
@@ -80,6 +85,8 @@ class Thread(BaseModel):
     author_id = sa.Column(sa.String(64))
 
     posts = relationship('Post', backref='thread')
+
+    moderations = relationship('ModerationAction', secondary=thread_moderation_association, backref='thread')
 
 class ModerationAction(BaseModel):
     __tablename__ = 'joystream_forum_moderation_action'
@@ -111,6 +118,7 @@ class Post(BaseModel):
 
     # Don't set up fk or relationship
     thread_id = sa.Column(sa.BigInteger(), sa.ForeignKey('joystream_forum_thread.id'))
+    author_id = sa.Column(sa.String(64))
 
     nr_in_thread = sa.Column(sa.Integer())
     current_text = sa.Column(sa.Text())
@@ -136,12 +144,7 @@ class PostTextChangeHistory(BaseModel):
     author_id = sa.Column(sa.String(64))
 
 
-thread_moderation_association = sa.Table('thread_moderation', BaseModel.metadata,
-                                         sa.Column('thread_id', sa.BigInteger(), sa.ForeignKey('joystream_forum_thread.id')),
-                                         sa.Column('moderation_action_id', sa.BigInteger(), sa.ForeignKey('joystream_forum_moderation_action.id')),
-)
-
-post_moderation_association = sa.Table('post_moderation', BaseModel.metadata,
+post_moderation_association = sa.Table('joystream_forum_post_moderation', BaseModel.metadata,
                                        sa.Column('post_id', sa.BigInteger(), sa.ForeignKey('joystream_forum_post.id')),
                                        sa.Column('moderation_action_id', sa.BigInteger(), sa.ForeignKey('joystream_forum_moderation_action.id')),
 )

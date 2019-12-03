@@ -1,5 +1,5 @@
 import sqlalchemy as sa
-from tests.test_joystream import JoystreamTest
+from test.test_joystream import JoystreamTest
 from app.models.data import Extrinsic, Event
 from app.models.joystream import Category
 
