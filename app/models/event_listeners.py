@@ -84,6 +84,8 @@ def update_thread(session, record):
             thread.update({Thread.title: param['value']})
         elif param['name'] == 'text':
             thread.update({Thread.text: param['value']})
+        elif param['name'] == 'category_id':
+            thread.update({Thread.category_id: param['value']})
 
 def create_post(session, record):
     '''Create post in response to Post Event'''
@@ -111,3 +113,5 @@ def update_post(session, record):
             post.update({Post.title: param['value']})
         elif param['name'] == 'text':
             post.update({Post.current_text: param['value']})
+        elif param['name'] == 'thread_id':
+            post.update({Post.thread_id: param['value']})

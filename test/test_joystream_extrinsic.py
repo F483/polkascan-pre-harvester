@@ -104,6 +104,7 @@ class JoystreamExtrinsicTest(JoystreamTest):
         thread = Thread.query(self.session).filter_by(block_id=101).first()
         self.assertEqual(thread.title, 'a test thread')
         self.assertEqual(thread.text, 'here is a test thread')
+        self.assertEqual(thread.category_id, 3)
 
         post_event = Event(
             block_id=102,
@@ -140,6 +141,7 @@ class JoystreamExtrinsicTest(JoystreamTest):
 
         post = Post.query(self.session).filter_by(block_id=102).first()
         self.assertEqual(post.current_text, 'Here is a reply to the test thread')
+        self.assertEqual(post.thread_id, 2)
 
 if __name__ == '__main__':
     unittest.main()
