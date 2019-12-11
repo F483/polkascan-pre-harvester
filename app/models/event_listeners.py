@@ -109,8 +109,6 @@ def update_post(session, record):
     for param in record.params:
         if param['name'] == 'parent':
             post.update({Post.parent_id: param['value']})
-        elif param['name'] == 'title':
-            post.update({Post.title: param['value']})
         elif param['name'] == 'text':
             post.update({Post.current_text: param['value']})
         elif param['name'] == 'thread_id':
