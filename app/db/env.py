@@ -1,5 +1,10 @@
 from __future__ import with_statement
 
+import sys
+from os.path import dirname, abspath
+
+sys.path.append(abspath(dirname(dirname(dirname(__file__)))))
+
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config

@@ -1,5 +1,8 @@
 #! /usr/bin/env sh
 
+alias python=python3
+alias gunicorn=gunicorn3
+
 if [ -z $ENVIRONMENT ] || [ "$ENVIRONMENT" = "dev" ]; then
     ENVIRONMENT="dev"
 fi

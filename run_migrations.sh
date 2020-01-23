@@ -1,5 +1,8 @@
 #!/bin/bash
 
+alias python=python3
+alias gunicorn=gunicorn3
+
 if [ -z "$1" ]; then
     echo "Usage: ./run_migrations.sh <development|test>"
     exit 1
