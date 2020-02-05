@@ -13,6 +13,7 @@ services:
     environment: &env
       - CELERY_BROKER=redis://redis:6379/0
       - CELERY_BACKEND=redis://redis:6379/0
+#     - SUBSTRATE_RPC_URL=wss://testnet-rpc.joystream.org/acropolis/rpc/
       - PYTHONPATH=/usr/src/app
       - ENVIRONMENT=dev
     depends_on:
@@ -65,8 +66,9 @@ services:
 
   substrate-node:
     image: polkasource/substrate-alexander:latest
+    image: local-substrate-joystream-node
     ports:
       - '30333:30333'
       - '9933:9933'
       - '9944:9944'
-    command: --dev --rpc-port 9933 --rpc-external --pruning=10000000
+    command: --pruning=10000000 --rpc-port 9933 --ws-port 9944  ---ws-external --rpc-external
